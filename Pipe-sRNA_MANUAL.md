@@ -83,6 +83,7 @@ bowtie-build ${FASTA}.fa ${PREFIX_INDEX}
 # Warning: some bowtie1 versions don't support ".gz" format.
 bowtie -v 1 --threads $THREADS --un ${RRNA_UNALIGNED}.fq $RRNA_INDEX ${FASTQ}.fq 2 > ${LOG}.log |\
 samtools view -bS --threads $THREADS --reference ${RRNA_FASTA}.fa -o ${RRNA_BAM}.bam -
+
 # After all alignments, you can combine $LOG to a single file showing mapping statistics.
 echo -e "Sample\tReads_Processed\tAligned_Reads\tFailed_Reads" > align_sum.txt
 for file in $(ls *.log)
