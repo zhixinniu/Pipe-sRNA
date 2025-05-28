@@ -54,7 +54,7 @@ mirtrace trace qc -t 30 -s hsa *.gz  # run trace mode
 
 ## 4. Contamination filtering
 
-Remove reads of tRNA, rRNA, ncRNA, cDNA, piRNA \#### 4.1 Make bowtie index
+Remove reads of tRNA, rRNA, ncRNA, cDNA, piRNA
 
 ### 4.1 Installation
 
@@ -81,7 +81,8 @@ bowtie-build $FASTA $INDEX
 ``` bash
 # Align raw reads to rRNA reference, and output unaligned reads (without rRNA) for the next step.
 # Warning: some bowtie1 versions don't support ".gz" format.
-bowtie -v 1 --threads $THREADS --un $RRNA_UNALIGNED $RRNA_INDEX $FASTQ 2 > $LOG | samtools view -bS --threads $THREADS --reference $RRNA_FASTA -o $RRNA_BAM -
+bowtie -v 1 --threads $THREADS --un $RRNA_UNALIGNED $RRNA_INDEX $FASTQ 2 > $LOG |\
+samtools view -bS --threads $THREADS --reference $RRNA_FASTA -o $RRNA_BAM -
 # After all alignments, you can combine $LOG to a single file showing mapping statistics.
 
 ```
