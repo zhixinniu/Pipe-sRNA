@@ -86,15 +86,29 @@ bowtie -v 1 --threads $THREADS --un ${RRNA_UNALIGNED}.fq $RRNA_INDEX ${FASTQ}.fq
 samtools view -bS --threads $THREADS --reference ${RRNA_FASTA}.fa -o ${RRNA_BAM}.bam -
 
 # After all alignments, you can combine $LOG to a single file showing mapping statistics.
-echo -e "Sample\tReads_Processed\tAligned_Reads\tFailed_Reads" > align_sum.txt
-for file in $(ls *.log)
-do
-  id=$(basename "$file" .log)
-  reads_processed=$(awk 'NR==1{print $4}' "$file")
-  aligned=$(awk 'NR==2{print $9,$10}' "$file")
-  failed=$(awk 'NR==3{print $7,$8}' "$file")
-  echo -e "${id}\t${reads_processed}\t${aligned}\t${failed}"
-done >> align_sum.txt
+function stats_contaminant(){
+  output="$1"
+  
+  shift
+  
+  if [ -f "$output" ];then
+    rm "$output"
+  fi
+  
+  echo -e "Sample\tReads_Processed\tAligned_Reads\tFailed_Reads" > "$output"
+  
+  for file in "$@";do
+    id=$(basename "$file" .log)
+    reads_processed=$(awk 'NR==1{print $4}' "$file")
+    aligned=$(awk 'NR==2{print $9,$10}' "$file")
+    failed=$(awk 'NR==3{print $7,$8}' "$file")
+    echo -e "${id}\t${reads_processed}\t${aligned}\t${failed}" >> "$output"
+  done
+  
+}
+
+# Define the output file at the first position, and input $LOG behind output file name.
+stats_contaminant ${LOG_SUM}.txt ${LOG}.log <$LOG2,$LOG3,$LOG4,...>
 ```
 
 #### 4.3.2 Filter tRNA
@@ -103,6 +117,9 @@ done >> align_sum.txt
 # Align unmapped reads from the last step, ${RRNA_UNALIGNED}.fq, to tRNA reference
 bowtie -v 1 --threads $THREADS --un ${TRNA_UNALIGNED}.fq $TRNA_INDEX ${RRNA_UNALIGNED}.fq 2 > ${LOG}.log |\
 samtools view -bS --threads $THREADS --reference ${TRNA_FASTA}.fa -o ${TRNA_BAM}.bam -
+
+# Mapping summary
+stats_contaminant ${LOG_SUM}.txt ${LOG}.log <$LOG2,$LOG3,$LOG4,...>
 ```
 
 #### 4.3.3 Filter cDNA
@@ -113,7 +130,29 @@ samtools view -bS --threads $THREADS --reference ${TRNA_FASTA}.fa -o ${TRNA_BAM}
 seqkit grep -r -p "hsa" ${HAIRPIN_MIRNA}.fa > ${HSA_HAIRPIN}.fa  
 
 # blat <database> <query>
-blat ${CDNA}.fa ${HSA_HAIRPIN}.fa ${OUTPUT}.psl
+blat -out=blast8 ${HSA_CDNA}.fa ${HSA_HAIRPIN}.fa ${OUTPUT}.blast8
 
 # Extract significant BLAT hits
+awk -v FS="\t" '{if($11 < 1e-5) print $2}' ${OUTPUT}.blast8 | sort | uniq > ${HSA_HAIRPIN_UNIQ}.txt  
+
+# Remove the hairpin miRNA from the cDNA data
+seqkit grep -v -f ${HSA_HAIRPIN_UNIQ}.txt ${HSA_CDNA}.fa > ${HSA_CDNA_NO_MIRNA}.fa
+
+# Build index for ${HSA_CDNA_NO_MIRNA}.fa
+bowtie-build ${HSA_CDNA_NO_MIRNA}.fa ${HSA_CDNA_NO_MIRNA}.ebwt
+
+# Align filtered reads from 4.3.2 to cDNA
+bowtie -v 1 --threads $THREADS --un ${CDNA_UNALIGNED}.fq ${HSA_CDNA_NO_MIRNA}.ebwt ${TRNA_UNALIGNED}.fq 2 > ${LOG}.log |\
+samtools view -bS --threads $THREADS --reference ${HSA_CDNA_NO_MIRNA}.fa -o ${CDNA_BAM}.bam -
+
+# Mapping summary
+stats_contaminant ${LOG_SUM}.txt ${LOG}.log <$LOG2,$LOG3,$LOG4,...>
+
+
+# ${HSA_CDNA_NO_MIRNA}.fa: ~/zniu_ws/ref/human/hg38_sRNA/GRCh38_cDNA_no_mirna.fa
+# ${HSA_CDNA_NO_MIRNA}.ebwt: ~/zniu_ws/ref/human/hg38_sRNA/bowtie_index/GRCh38_cDNA_no_mirna
+# ${OUTPUT}.blast8: ~/zniu_ws/ref/human/hg38_sRNA/BLAT/
+# ${HSA_HAIRPIN_UNIQ}.txt: 
+# ${HSA_CDNA}.fa:
+# 
 ```
