@@ -12,7 +12,7 @@ conda activate smrna
 ### 1.2 Quality check
 
 ``` bash
-fastqc -j $THREADS -o $OUTPUT_DIR $FASTQ
+fastqc -j $THREADS -o $OUTPUT_DIR ${FASTQ}.fq
 ```
 
 ### 1.3 UMI extraction and miRNA adapter trimming
@@ -46,8 +46,8 @@ conda install mirtrace
 ### 3.2 Usage
 
 ``` bash
-mirtrace qc -t 30 -s hsa *.gz  # run qc mode
-mirtrace trace qc -t 30 -s hsa *.gz  # run trace mode
+mirtrace qc -t 30 -s hsa ${FASTQ}.fq  ## run qc mode
+mirtrace trace qc -t 30 -s hsa ${FASTQ}.fq  # run trace mode
 ```
 
 ------------------------------------------------------------------------
@@ -65,7 +65,7 @@ conda install -y bowtie blat
 ### 4.2 Make bowtie index
 
 ``` bash
-bowtie-build $FASTA $INDEX
+bowtie-build ${FASTA}.fa ${PREFIX_INDEX}
 ```
 
 > cDNA: Homo_sapiens.GRCh38.cdna.all.fa.gz <https://ftp.ensembl.org/pub/current_fasta/homo_sapiens/cdna/>\
@@ -81,7 +81,7 @@ bowtie-build $FASTA $INDEX
 ``` bash
 # Align raw reads to rRNA reference, and output unaligned reads (without rRNA) for the next step.
 # Warning: some bowtie1 versions don't support ".gz" format.
-bowtie -v 1 --threads $THREADS --un $RRNA_UNALIGNED $RRNA_INDEX $FASTQ 2 > $LOG |\
+bowtie -v 1 --threads $THREADS --un ${RRNA_UNALIGNED}.fq $RRNA_INDEX ${FASTQ}.fq 2 > ${LOG}.log |\
 samtools view -bS --threads $THREADS --reference $RRNA_FASTA -o $RRNA_BAM -
 # After all alignments, you can combine $LOG to a single file showing mapping statistics.
 
