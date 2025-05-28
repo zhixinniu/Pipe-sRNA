@@ -35,7 +35,7 @@ fastp
 
 ## 3. miRNA QC
 
-miRNA quality check, including PHRED score, taxonomic classification, read length, and proportion of different RNAs. \#### 3.1 Installation
+miRNA quality check, including PHRED score, taxonomic classification, read length, and proportion of different RNAs.
 
 ### 3.1 Installation
 
@@ -59,7 +59,7 @@ Remove reads of tRNA, rRNA, ncRNA, cDNA, piRNA
 ### 4.1 Installation
 
 ``` bash
-conda install -y bowtie blat
+conda install -y bowtie blat seqkit
 ```
 
 ### 4.2 Make bowtie index
@@ -72,7 +72,8 @@ bowtie-build ${FASTA}.fa ${PREFIX_INDEX}
 > ncRNA: Homo_sapiens.GRCh38.ncrna.fa.gz <https://ftp.ensembl.org/pub/current_fasta/homo_sapiens/ncrna/>\
 > tRNA: hg38-tRNAs.fa <https://gtrnadb.ucsc.edu/>\
 > piRNA: hsa.v3.0.fa.gz <http://bigdata.ibp.ac.cn/piRBase/download.php>\
-> rRNA: rRNA_reference.fa <https://github.com/friedlanderlab/mirtrace>
+> rRNA: rRNA_reference.fa <https://github.com/friedlanderlab/mirtrace>\
+> miRNA: hairpin and mature <https://www.mirbase.org/>
 
 ### 4.3 Filtering
 
@@ -96,4 +97,23 @@ do
 done >> align_sum.txt
 ```
 
-#### 4.3.2
+#### 4.3.2 Filter tRNA
+
+``` bash
+# Align unmapped reads from the last step, ${RRNA_UNALIGNED}.fq, to tRNA reference
+bowtie -v 1 --threads $THREADS --un ${TRNA_UNALIGNED}.fq $TRNA_INDEX ${RRNA_UNALIGNED}.fq 2 > ${LOG}.log |\
+samtools view -bS --threads $THREADS --reference ${TRNA_FASTA}.fa -o ${TRNA_BAM}.bam -
+```
+
+#### 4.3.3 Filter cDNA
+
+``` bash
+# Search which hairpin miRNA are present in cDNA data
+# Get hairpin miRNA only for human
+seqkit grep -r -p "hsa" ${HAIRPIN_MIRNA}.fa > ${HSA_HAIRPIN}.fa  
+
+# blat <database> <query>
+blat ${CDNA}.fa ${HSA_HAIRPIN}.fa ${OUTPUT}.psl
+
+# Extract significant BLAT hits
+```
