@@ -62,18 +62,14 @@ Remove reads of tRNA, rRNA, ncRNA, cDNA, piRNA
 conda install -y bowtie blat seqkit
 ```
 
-### 4.2 Make bowtie index
+### 4.2 Download database
 
-``` bash
-bowtie-build ${FASTA}.fa ${PREFIX_INDEX}
-```
-
-> cDNA: Homo_sapiens.GRCh38.cdna.all.fa.gz <https://ftp.ensembl.org/pub/current_fasta/homo_sapiens/cdna/>\
-> ncRNA: Homo_sapiens.GRCh38.ncrna.fa.gz <https://ftp.ensembl.org/pub/current_fasta/homo_sapiens/ncrna/>\
-> tRNA: hg38-tRNAs.fa <https://gtrnadb.ucsc.edu/>\
-> piRNA: hsa.v3.0.fa.gz <http://bigdata.ibp.ac.cn/piRBase/download.php>\
-> rRNA: rRNA_reference.fa <https://github.com/friedlanderlab/mirtrace>\
-> miRNA: hairpin and mature <https://www.mirbase.org/>
+cDNA: Homo_sapiens.GRCh38.cdna.all.fa.gz <https://ftp.ensembl.org/pub/current_fasta/homo_sapiens/cdna/>\
+ncRNA: Homo_sapiens.GRCh38.ncrna.fa.gz <https://ftp.ensembl.org/pub/current_fasta/homo_sapiens/ncrna/>\
+tRNA: hg38-tRNAs.fa <https://gtrnadb.ucsc.edu/>\
+piRNA: hsa.v3.0.fa.gz <http://bigdata.ibp.ac.cn/piRBase/download.php>\
+rRNA: rRNA_reference.fa <https://github.com/friedlanderlab/mirtrace>\
+miRNA: hairpin and mature <https://www.mirbase.org/>
 
 ### 4.3 Filtering
 
