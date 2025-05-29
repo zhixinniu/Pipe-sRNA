@@ -150,9 +150,10 @@ stats_contaminant ${LOG_SUM}.txt ${LOG}.log <$LOG2,$LOG3,$LOG4,...>
 
 
 # ${HSA_CDNA_NO_MIRNA}.fa: ~/zniu_ws/ref/human/hg38_sRNA/GRCh38_cDNA_no_mirna.fa
-# ${HSA_CDNA_NO_MIRNA}.ebwt: ~/zniu_ws/ref/human/hg38_sRNA/bowtie_index/GRCh38_cDNA_no_mirna
-# ${OUTPUT}.blast8: ~/zniu_ws/ref/human/hg38_sRNA/BLAT/
-# ${HSA_HAIRPIN_UNIQ}.txt: 
-# ${HSA_CDNA}.fa:
-# 
+# ${HSA_CDNA_NO_MIRNA}.ebwt: ~/zniu_ws/ref/human/hg38_sRNA/bowtie_index/GRCh38_cDNA_no_mirna.fa
+# ${OUTPUT}.blast8: ~/zniu_ws/ref/human/hg38_sRNA/BLAT/which_hairpin_in_cDNA.blast8
+# ${HSA_HAIRPIN_UNIQ}.txt: ~/zniu_ws/ref/human/hg38_sRNA/sig_hsa_mirna_hairpin.txt
+# ${HSA_CDNA}.fa: ~/zniu_ws/ref/human/hg38_sRNA/Homo_sapiens.GRCh38.cdna.all.fa.gz
+# ${HAIRPIN_MIRNA}.fa: ~/zniu_ws/ref/human/hg38_sRNA/hairpin.fa
+# ${HSA_HAIRPIN}.fa: ~/zniu_ws/ref/human/hg38_sRNA/hairpin_hsa.fa
 ```
