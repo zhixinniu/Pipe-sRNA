@@ -150,10 +150,45 @@ stats_contaminant ${LOG_SUM}.txt ${LOG}.log <$LOG2,$LOG3,$LOG4,...>
 
 
 # ${HSA_CDNA_NO_MIRNA}.fa: ~/zniu_ws/ref/human/hg38_sRNA/GRCh38_cDNA_no_mirna.fa
-# ${HSA_CDNA_NO_MIRNA}.ebwt: ~/zniu_ws/ref/human/hg38_sRNA/bowtie_index/GRCh38_cDNA_no_mirna.fa
+# ${HSA_CDNA_NO_MIRNA}.ebwt: ~/zniu_ws/ref/human/hg38_sRNA/bowtie_index/GRCh38_cDNA_no_mirna
 # ${OUTPUT}.blast8: ~/zniu_ws/ref/human/hg38_sRNA/BLAT/which_hairpin_in_cDNA.blast8
-# ${HSA_HAIRPIN_UNIQ}.txt: ~/zniu_ws/ref/human/hg38_sRNA/sig_hsa_mirna_hairpin.txt
+# ${HSA_HAIRPIN_UNIQ}.txt: ~/zniu_ws/ref/human/hg38_sRNA/sig_hsa_mirna_cdna.txt
 # ${HSA_CDNA}.fa: ~/zniu_ws/ref/human/hg38_sRNA/Homo_sapiens.GRCh38.cdna.all.fa.gz
 # ${HAIRPIN_MIRNA}.fa: ~/zniu_ws/ref/human/hg38_sRNA/hairpin.fa
 # ${HSA_HAIRPIN}.fa: ~/zniu_ws/ref/human/hg38_sRNA/hairpin_hsa.fa
 ```
+
+#### 4.3.4 Filter ncRNA
+
+``` bash
+# Search which hairpin miRNAs are present in the ncRNA data
+blat -out=blast8 ${HSA_NCRNA}.fa ${HSA_HAIRPIN}.fa ${OUTPUT}.blast8
+
+# Extract the significant hits
+awk -v FS="\t" '{if($11 < 1e-5) print $2}' ${OUTPUT}.blast8 | sort | uniq > ${HSA_HAIRPIN_UNIQ}.txt 
+
+# Remove the hairpin miRNAs from the ncRNA data
+seqkit grep -v -f ${HSA_HAIRPIN_UNIQ}.txt ${HSA_NCRNA}.fa > ${HSA_NCRNA_NO_MIRNA}.fa
+
+# Build bowtie index for ${HSA_NCRNA_NO_MIRNA}.fa
+bowtie-build ${HSA_NCRNA_NO_MIRNA}.fa ${HSA_NCRNA_NO_MIRNA}.ebwt
+
+# Map which reads are ncRNA
+bowtie -v 1 --threads $THREADS --un ${NCRNA_UNALIGNED}.fq ${HSA_NCRNA_NO_MIRNA}.ebwt ${CDNA_UNALIGNED}.fq 2 > ${LOG}.log |\
+samtools view -bS --threads $THREADS --reference ${HSA_NCRNA_NO_MIRNA}.fa -o ${NCRNA_BAM}.bam -
+
+# Mapping summary
+stats_contaminant ${LOG_SUM}.txt ${LOG}.log <$LOG2,$LOG3,$LOG4,...>
+
+
+# ${HSA_NCRNA}.fa: ~/zniu_ws/ref/human/hg38_sRNA/Homo_sapiens.GRCh38.ncrna.fa.gz
+# ${HSA_HAIRPIN}.fa: ~/zniu_ws/ref/human/hg38_sRNA/hairpin_hsa.fa
+# ${OUTPUT}.blast8: ~/zniu_ws/ref/human/hg38_sRNA/BLAT/which_hairpin_in_ncRNA.blast8
+# ${HSA_HAIRPIN_UNIQ}.txt: ~/zniu_ws/ref/human/hg38_sRNA/sig_hsa_mirna_ncrna.txt
+# ${HSA_NCRNA_NO_MIRNA}.fa: ~/zniu_ws/ref/human/hg38_sRNA/GRCh38_ncRNA_no_mirna.fa
+# ${HSA_NCRNA_NO_MIRNA}.ebwt: ~/zniu_ws/ref/human/hg38_sRNA/bowtie_index/GRCh38_ncRNA_no_mirna
+```
+
+
+
+
