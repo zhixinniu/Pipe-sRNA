@@ -15,7 +15,6 @@ conda activate smrna
 fastqc -j $THREADS -o $OUTPUT_DIR ${FASTQ}.fq
 multiqc .
 ```
-> 指控部分待完成  
 
 ### 1.3 提取UMI
 
