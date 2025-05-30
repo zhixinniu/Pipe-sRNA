@@ -250,7 +250,7 @@ bowtie-build hairpin_hsa_parsed.fa ${HAIRPIN_HSA}.ebwt
 bowtie -k 50 -e 99999 --best --strata --sam --chunkmbs 2048 --threads 20 --un ${HAIRPIN_UNMAP}.fq ${HAIRPIN_HSA}.ebwt ${MATURE_UNMAP}.fq 2>${LOG}.log |\
 samtools view -@ $THREADS -bS -o ${PREFIX}.bam - 
 ```
-#### 5.1.4 统计定量比对结果
+#### 5.1.4 统计定量结果
 ```bash
 
 # 统计比对到mature miRNA
@@ -294,8 +294,8 @@ library("methods")
 
 # 将mature和hairpin的idxstats分别放在一个列表中
 filelist <- list()
-filelist[[1]] <- list.files('/mnt/workspace_lgu/zniu/project/epi_clock/HL60_RNA/BMK250321-CP281-ZX01-1101/BMK_DATA_20250527124829_1/Data/4_Mapping',pattern = '.*mature.idxstats',full.names = T)  # 把mature的idxstats放在第一个元素中
-filelist[[2]] <- list.files('/mnt/workspace_lgu/zniu/project/epi_clock/HL60_RNA/BMK250321-CP281-ZX01-1101/BMK_DATA_20250527124829_1/Data/4_Mapping',pattern = '.*hairpin.idxstats',full.names = T)  # 把hairpin的idxstats放在第一个元素中
+filelist[[1]] <- c()  # 把mature的idxstats放在第一个元素中
+filelist[[2]] <- c()  # 把hairpin的idxstats放在第一个元素中
 names(filelist)<-c("mature","hairpin")
 
 for (i in 1:2){
@@ -399,6 +399,7 @@ for (i in 1:2){
 
 ```
 
+## 6. 下游差异基因分析
 
 
 
